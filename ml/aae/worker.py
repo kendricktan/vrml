@@ -76,7 +76,7 @@ class aae_worker:
         self.decoder.zero_grad()
         self.discrim.zero_grad()
 
-    def train(self, loader, current_epoch, viz_func=None):
+    def train(self, loader, current_epoch, viz_func=None, is_train_func=None):
         for idx, (features_, _) in enumerate(tqdm(loader)):
             features = features_
             features = Variable(self.cudafy_(features))
@@ -135,6 +135,11 @@ class aae_worker:
             if viz_func:
                 viz_matrix = self.encoder.conv(smoothen_features).view(-1)
                 viz_func(viz_matrix.data.cpu().numpy())
+
+            # Is training stopped?
+            if is_train_func:
+                if is_train_func():
+                    break
 
             tqdm.write(
                 "Epoch: {}\t"
