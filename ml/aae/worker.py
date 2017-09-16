@@ -1,3 +1,4 @@
+import h5py
 import random
 import os
 import torch
@@ -9,6 +10,9 @@ import numpy as np
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
+
+from annoy import AnnoyIndex
+from sklearn.manifold import TSNE
 
 from tqdm import tqdm
 from torch.autograd import Variable
@@ -52,6 +56,11 @@ class aae_worker:
         self.optim_gen = optim.Adam(generator_params, lr=lr)
 
         self.start_epoch = 0
+
+        # z dimensions
+        self.z_dim = z_dim
+        self.tree = AnnoyIndex(3, metric='euclidean')
+        self.h5_file = None
 
     def cudafy_(self, m):
         if self.cuda:
@@ -224,3 +233,68 @@ class aae_worker:
 
         else:
             print('Cant find file')
+
+    def build_tree(self, loader):
+        # only building in z_dim
+        t = AnnoyIndex(3, metric='euclidean')
+
+        h5 = h5py.File('ann_data.h5', 'w')
+
+        images = []
+        embeddings = []
+
+        for idx, (features, _) in enumerate(tqdm(loader)):
+            features = self.cudafy_(Variable(features))
+
+            z = self.encoder(features).squeeze()
+            z_np = z.data.cpu().numpy()
+
+            images.append(list(features.data.cpu().numpy().squeeze()))
+            embeddings.append(z_np)
+
+        # TSNE it
+        z = embeddings
+
+        if self.z_dim > 3:
+            z = TSNE(n_components=3).fit_transform(z_np)
+
+        for idx, x in enumerate(tqdm(z)):
+            t.add_item(idx, x)
+
+        t.build(32)  # 32 trees
+        t.save('aae.ann')
+
+        h5.create_dataset('image', data=images)
+        h5.create_dataset('coordinate', data=embeddings)
+
+    def load_tree(self, tree_loc, h5_loc):
+        self.tree.load(tree_loc)
+        self.h5_file = h5py.File(h5_loc, 'r')
+
+    def search_similar(self, coordinate):
+        if self.h5_file is None:
+            print('YOUR HAVENT LOAD YOUR H5 FILE')
+
+        # Returns top 50
+        ret = self.tree.get_nns_by_vector(
+            coordinate, 50, include_distances=True)
+
+        if len(ret[0]) == 0:
+            print('YOUR DB IS EMPTY. YOU PROBABLY HAVENT LOAD YOUR SHIT')
+
+        image_indexes = []
+        distances = []
+        coordinates = []
+
+        for i, (idx, dis) in enumerate(zip(ret[0], ret[1])):
+            img_loc = '/tmp/image{}.png'.format(i)
+
+            # Save image
+            img = self.tensor2pil(np.array(self.h5_file['image'][idx]))
+            img.save(img_loc)
+
+            image_indexes.append(idx)
+            distances.append(dis)
+            coordinates.append(self.h5_file['coordinate'][idx])
+
+        return image_indexes, coordinates, distances
