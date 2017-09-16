@@ -141,3 +141,5 @@ sysinfo.txt
 *.tar
 
 */aae/visualize/*.png
+*.ann
+*.h5
