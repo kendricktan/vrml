@@ -74,10 +74,10 @@ public class FirebaseTest : MonoBehaviour
         c.GetComponent<Renderer>().material.color = defaultColor;
         c.name = name;
 
-        // rigidbody, no gravidy, is trigger
+        // rigidbody, no gravity, is trigger
         Rigidbody c_rigidbody = c.AddComponent<Rigidbody>();
         c_rigidbody.useGravity = false;
-        Collider c_collider = c.AddComponent<Collider>();
+        Collider c_collider = c.GetComponent<Collider>(); 
         c_collider.isTrigger = true;
         TriggerImage Sc_script = c.AddComponent<TriggerImage>();
     }
