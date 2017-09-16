@@ -27,19 +27,63 @@ public class FirebaseTest : MonoBehaviour
         defaultColor = Color.blue;
         defaultScale = new Vector3(0.01f, 0.01f, 0.01f);
 
+        StartCoroutine(addImageTriggerScript());
+
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://vrml-c8ee5.firebaseio.com/");
-        storage = FirebaseStorage.DefaultInstance;
+        storage = storage = FirebaseStorage.GetInstance("gs://vrml-c8ee5.appspot.com/");
         reference = FirebaseDatabase.DefaultInstance.RootReference;
         reference.Child("images_similar_100").ChildChanged += HandleChildChanged;
         reference.Child("neurons").Child("activations").ValueChanged += HandleNeuronChanges;
         reference.Child("is_training").ValueChanged += TrainingChanged;
     }
 
+    IEnumerator addImageTriggerScript() {
+        yield return new WaitForSeconds(3f);
+        GameObject h1z1 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        h1z1.GetComponent<MeshRenderer>().enabled = false;
+        h1z1.transform.SetParent(GameObject.Find("Hand1").transform.Find("BlankController_Hand1").transform.Find("SteamVR_RenderModel").transform);
+        h1z1.transform.localScale = new Vector3(.1f, .1f, .1f);
+        h1z1.transform.localPosition = new Vector3(0, 0, 0);
+        h1z1.AddComponent<Rigidbody>();
+        h1z1.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ;
+        h1z1.GetComponent<Rigidbody>().useGravity = false;
+        h1z1.GetComponent<SphereCollider>().isTrigger = true;
+        h1z1.AddComponent<TriggerImage>();
+        GameObject tpain = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        tpain.transform.SetParent(GameObject.Find("Hand1").transform);
+        tpain.transform.localScale = new Vector3(.02f, .02f, .02f);
+        tpain.transform.localPosition = Vector3.zero;
+        //tpain.transform.localPosition += new Vector3(0, .01f, 0);
+        h1z1.GetComponent<TriggerImage>().pane = tpain;
+        tpain.SetActive(false);
+
+        GameObject h1z2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        h1z2.GetComponent<MeshRenderer>().enabled = false;
+        h1z2.transform.SetParent(GameObject.Find("Hand2").transform.Find("BlankController_Hand2").transform.Find("SteamVR_RenderModel").transform);
+        h1z2.transform.localScale = new Vector3(.1f, .1f, .1f);
+        h1z2.transform.localPosition = new Vector3(0, 0, 0);
+        h1z2.AddComponent<Rigidbody>();
+        h1z2.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ;
+        h1z2.GetComponent<Rigidbody>().useGravity = false;
+        h1z2.GetComponent<SphereCollider>().isTrigger = true;
+        h1z2.AddComponent<TriggerImage>();
+
+        GameObject tpain2 = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        tpain2.transform.SetParent(GameObject.Find("Hand2").transform);
+        tpain2.transform.localScale = new Vector3(.02f, .02f, .02f);
+        tpain2.transform.localPosition = Vector3.zero;
+        //tpain2.transform.localPosition += new Vector3(0, .01f, 0);
+        h1z2.GetComponent<TriggerImage>().pane = tpain2;
+        tpain2.SetActive(false);
+
+    }
+
     bool start = true;
     void TrainingChanged(object sender, ValueChangedEventArgs args) {
         Debug.Log(args.Snapshot.GetRawJsonValue());
         if(args.Snapshot.Value.ToString() == "0" && !start) {
-            hideNeurons();
+            //hideNeurons();
+            deleteNeurons();
             reference.Child("query_coord").SetValueAsync("0,0,0");
         } else if (start) {
             start = false;
@@ -103,18 +147,18 @@ public class FirebaseTest : MonoBehaviour
             Debug.Log(n.AsArray[i]["distance"]);
 
             if (!GameObject.Find(n.AsArray[i]["id"])) {
-                createCube(string2Vector3(n.AsArray[i]["coord"]["x"], n.AsArray[i]["coord"]["y"], n.AsArray[i]["coord"]["z"]) / 5f, n.AsArray[i]["id"]);
+                createCube(string2Vector3(n.AsArray[i]["coord"]["x"], n.AsArray[i]["coord"]["y"], n.AsArray[i]["coord"]["z"]) / 2f, n.AsArray[i]["id"], 3f);
             } else {
-                updateCube(string2Vector3(n.AsArray[i]["coord"]["x"], n.AsArray[i]["coord"]["y"], n.AsArray[i]["coord"]["z"]) / 5f, n.AsArray[i]["id"], Color.red * n.AsArray[i]["distance"]);
+                updateCube(string2Vector3(n.AsArray[i]["coord"]["x"], n.AsArray[i]["coord"]["y"], n.AsArray[i]["coord"]["z"]) / 2f, n.AsArray[i]["id"], Color.red * n.AsArray[i]["distance"]);
             }
         }
     }
 
-    GameObject createCube(Vector3 pos, string name) {
+    GameObject createCube(Vector3 pos, string name, float scaleMod = 0) {
         GameObject c = GameObject.CreatePrimitive(PrimitiveType.Cube);
         c.transform.SetParent(imagesHolder);
         c.transform.localPosition = pos;
-        c.transform.localScale = defaultScale * 3;
+        c.transform.localScale = defaultScale;
         c.GetComponent<Renderer>().material.color = defaultColor;
         c.name = name;
         c.tag = "InteractionCube";
@@ -132,21 +176,21 @@ public class FirebaseTest : MonoBehaviour
         c.GetComponent<Renderer>().material.color = color;
     }
 
-    void getImageFromStorage(string imageId, string cubeid) {
-        StorageReference reference = storage.GetReference("images/" + imageId + ".png");
+    public void getImageFromStorage(string imageId, GameObject pane) {
+        StorageReference reference = storage.GetReference(imageId);
         reference.GetDownloadUrlAsync().ContinueWith(task => {
-            StartCoroutine(getImageViaWWW(task.Result.ToString(), cubeid));
+            StartCoroutine(getImageViaWWW(task.Result.ToString(), pane));
         });
     }
 
-    IEnumerator getImageViaWWW(string url, string cubeid) // change this
+    IEnumerator getImageViaWWW(string url, GameObject pane) // change this
     {
         Texture2D tex;
         tex = new Texture2D(4, 4, TextureFormat.DXT1, false);
         WWW www = new WWW(url);
         yield return www;
         www.LoadImageIntoTexture(tex);
-        GameObject.Find(cubeid).GetComponent<Renderer>().material.mainTexture = tex;
+        pane.GetComponent<Renderer>().material.mainTexture = tex;
     }
 
     void MsgChanged(object sender, ValueChangedEventArgs args) {

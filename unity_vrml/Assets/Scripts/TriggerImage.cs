@@ -4,17 +4,32 @@ using UnityEngine;
 
 public class TriggerImage : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
+	void Update() {
+        if(pane != null && player != null) {
+            pane.transform.LookAt(pane.transform.position + player.transform.rotation * Vector3.up,
+         player.transform.rotation * Vector3.up);
+        }
+    }
 
-    private void OnTriggerEnter(Collider other)
-    {
+    string imgid;
+    public GameObject pane;
+    public GameObject player;
+
+    void Start() {
+        player = GameObject.Find("VRCamera");
+    }
+
+    private void OnTriggerEnter(Collider other)    {
         if (other.tag.Equals("InteractionCube")) {
-            // pop up image
-            Debug.Log("SHOW IMAGE");
-            //other.GetComponent<FirebaseTest>. getimage...
+            imgid = other.name;
+            pane.SetActive(true);
+            GameObject.Find("Scripts").GetComponent<FirebaseTest>().getImageFromStorage(imgid, pane);
+        }
+    }
+
+    private void OnTriggerExit(Collider other) {
+        if (other.tag.Equals("InteractionCube") && other.name == imgid) {
+            pane.SetActive(false);
         }
     }
 }
