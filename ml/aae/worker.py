@@ -236,7 +236,7 @@ class aae_worker:
 
     def build_tree(self, loader):
         # only building in z_dim
-        t = AnnoyIndex(self.z_dim, metric='euclidean')
+        t = AnnoyIndex(3, metric='euclidean')
 
         h5 = h5py.File('ann_data.h5', 'w')
 
@@ -253,7 +253,7 @@ class aae_worker:
             embeddings.append(z_np)
 
         # TSNE it
-        z = z_np
+        z = embeddings
 
         if self.z_dim > 3:
             z = TSNE(n_components=3).fit_transform(z_np)
