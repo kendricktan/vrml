@@ -50,10 +50,16 @@ def update_image_storage(store, idx, image_loc):
     store.child('image_{}.png'.format(idx)).put(image_loc)
 
 
+def is_train_func_part(db):
+    ret = db.child('is_training').get().val()
+    return ret == 0
+
+
 # Partial functions
 visualize_func = partial(update_neurons, database)
 search_func = partial(finding_similar, database)
 upload_img_func = partial(update_image_storage, storage)
+is_train_func = partial(is_train_func_part, database)
 
 
 if __name__ == '__main__':
@@ -76,11 +82,11 @@ if __name__ == '__main__':
     ])
 
     # dataset
-    train_dataset=datasets.ImageFolder(
+    train_dataset = datasets.ImageFolder(
         './data/',
         transform=transformers
     )
-    train_loader=torch.utils.data.DataLoader(
+    train_loader = torch.utils.data.DataLoader(
         dataset=train_dataset, batch_size=1, shuffle=True,
         pin_memory=cuda, num_workers=4
     )
@@ -91,7 +97,8 @@ if __name__ == '__main__':
     worker.load_(args.checkpoint_loc)
 
     if rebuild_tree:
-        worker.build_tree(train_loader, args.tree_loc, args.h5_loc, upload_func=upload_img_func)
+        worker.build_tree(train_loader, args.tree_loc,
+                          args.h5_loc, upload_func=upload_img_func)
 
     # Load our stuff
     worker.load_tree(args.tree_loc, args.h5_loc)
@@ -100,7 +107,7 @@ if __name__ == '__main__':
     def train_handle(msg):
         if msg['data'] == 1:
             print('Updating firebase activations...')
-            worker.train(train_loader, 0, viz_func=visualize_func)
+            worker.train(train_loader, 0, viz_func=visualize_func, is_train_func=is_train_func)
         database.child('is_training').set(0)
 
     def search_handle(msg):
