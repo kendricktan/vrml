@@ -73,13 +73,11 @@ public class FirebaseTest : MonoBehaviour
         c.transform.localScale = defaultScale;
         c.GetComponent<Renderer>().material.color = defaultColor;
         c.name = name;
+        c.tag = "InteractionCube";
 
-        // rigidbody, no gravity, is trigger
+        // rigidbody, no gravity
         Rigidbody c_rigidbody = c.AddComponent<Rigidbody>();
         c_rigidbody.useGravity = false;
-        Collider c_collider = c.GetComponent<Collider>(); 
-        c_collider.isTrigger = true;
-        TriggerImage Sc_script = c.AddComponent<TriggerImage>();
     }
 
     void updateCube(Vector3 pos, string name, Color color)

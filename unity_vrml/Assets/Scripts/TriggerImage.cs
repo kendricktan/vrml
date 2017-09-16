@@ -11,9 +11,10 @@ public class TriggerImage : MonoBehaviour {
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag.Equals("LeftHand") || other.tag.Equals("RightHand")) {
+        if (other.tag.Equals("InteractionCube")) {
             // pop up image
             Debug.Log("SHOW IMAGE");
+            //other.GetComponent<FirebaseTest>. getimage...
         }
     }
 }
