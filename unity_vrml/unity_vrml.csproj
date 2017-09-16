@@ -88,6 +88,9 @@
     <Reference Include="Firebase.Database">
       <HintPath>Assets\Firebase\Plugins\Firebase.Database.dll</HintPath>
     </Reference>
+    <Reference Include="Firebase.Storage">
+      <HintPath>Assets\Firebase\Plugins\Firebase.Storage.dll</HintPath>
+    </Reference>
     <Reference Include="Google.MiniJson">
       <HintPath>Assets\Firebase\Plugins\Google.MiniJson.dll</HintPath>
     </Reference>
@@ -99,9 +102,6 @@
     </Reference>
     <Reference Include="Unity.Tasks">
       <HintPath>Assets\Parse\Plugins\Unity.Tasks.dll</HintPath>
-    </Reference>
-    <Reference Include="Firebase.Storage">
-      <HintPath>Assets\Firebase\Plugins\Firebase.Storage.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -158,7 +158,8 @@
     <Compile Include="Assets\NewtonVR\Oculus\NVROculusIntegration.cs" />
     <Compile Include="Assets\NewtonVR\SteamVR\NVRSteamVRInputDevice.cs" />
     <Compile Include="Assets\NewtonVR\SteamVR\NVRSteamVRIntegration.cs" />
-    <Compile Include="Assets\Scripts\SphereSpawner.cs" />
+    <Compile Include="Assets\Scripts\FirebaseTest.cs" />
+    <Compile Include="Assets\Scripts\TriggerImage.cs" />
     <Compile Include="Assets\SteamVR\Extras\SteamVR_GazeTracker.cs" />
     <Compile Include="Assets\SteamVR\Extras\SteamVR_LaserPointer.cs" />
     <Compile Include="Assets\SteamVR\Extras\SteamVR_Teleporter.cs" />
