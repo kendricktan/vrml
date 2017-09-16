@@ -137,3 +137,7 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+*.tar
+
+*/aae/visualize/*.png
