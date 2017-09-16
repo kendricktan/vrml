@@ -1,10 +1,13 @@
 import h5py
 import random
 import os
+import sys
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
 import torchvision.transforms as transforms
+
+sys.path.append(os.path.dirname(__file__))
 
 import numpy as np
 import matplotlib as mpl
@@ -73,7 +76,7 @@ class aae_worker:
         self.decoder.zero_grad()
         self.discrim.zero_grad()
 
-    def train(self, loader, current_epoch):
+    def train(self, loader, current_epoch, viz_func=None):
         for idx, (features_, _) in enumerate(tqdm(loader)):
             features = features_
             features = Variable(self.cudafy_(features))
@@ -127,6 +130,11 @@ class aae_worker:
             gen_loss.backward()
             self.optim_gen.step()
             self.reset_gradients_()
+
+            # Update neurons
+            if viz_func:
+                viz_matrix = self.encoder.conv(smoothen_features).view(-1)
+                viz_func(viz_matrix.data.cpu().numpy())
 
             tqdm.write(
                 "Epoch: {}\t"
@@ -234,17 +242,27 @@ class aae_worker:
         else:
             print('Cant find file')
 
-    def build_tree(self, loader):
+    def build_tree(self, loader, tree_loc='aae.ann', h5_loc='ann_data.h5', upload_func=None):
         # only building in z_dim
         t = AnnoyIndex(3, metric='euclidean')
 
-        h5 = h5py.File('ann_data.h5', 'w')
+        h5 = h5py.File(h5_loc, 'w')
 
         images = []
         embeddings = []
 
         for idx, (features, _) in enumerate(tqdm(loader)):
+            # Get features
             features = self.cudafy_(Variable(features))
+
+            # Save image
+            img_loc = '/tmp/image{}.png'.format(idx)
+            img = self.tensor2pil(
+                np.array(features.data.cpu().numpy().squeeze()))
+            img.save(img_loc)
+
+            if upload_func:
+                upload_func(idx, img_loc)
 
             z = self.encoder(features).squeeze()
             z_np = z.data.cpu().numpy()
@@ -262,7 +280,7 @@ class aae_worker:
             t.add_item(idx, x)
 
         t.build(32)  # 32 trees
-        t.save('aae.ann')
+        t.save(tree_loc)
 
         h5.create_dataset('image', data=images)
         h5.create_dataset('coordinate', data=embeddings)
@@ -271,7 +289,7 @@ class aae_worker:
         self.tree.load(tree_loc)
         self.h5_file = h5py.File(h5_loc, 'r')
 
-    def search_similar(self, coordinate):
+    def search_similar(self, coordinate, search_func=None):
         if self.h5_file is None:
             print('YOUR HAVENT LOAD YOUR H5 FILE')
 
@@ -297,4 +315,6 @@ class aae_worker:
             distances.append(dis)
             coordinates.append(self.h5_file['coordinate'][idx])
 
-        return image_indexes, coordinates, distances
+        # update stuff on firebase
+        if search_func:
+            search_func(image_indexes, coordinates, distances)
