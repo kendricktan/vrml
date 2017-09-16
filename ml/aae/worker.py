@@ -12,6 +12,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 from annoy import AnnoyIndex
+from sklearn.manifold import TSNE
 
 from tqdm import tqdm
 from torch.autograd import Variable
@@ -248,10 +249,17 @@ class aae_worker:
             z = self.encoder(features).squeeze()
             z_np = z.data.cpu().numpy()
 
-            t.add_item(idx, z_np)
-
             images.append(list(features.data.cpu().numpy().squeeze()))
             embeddings.append(z_np)
+
+        # TSNE it
+        z = z_np
+
+        if self.z_dim > 3:
+            z = TSNE(n_components=3).fit_transform(z_np)
+
+        for idx, x in enumerate(tqdm(z)):
+            t.add_item(idx, x)
 
         t.build(32)  # 32 trees
         t.save('aae.ann')

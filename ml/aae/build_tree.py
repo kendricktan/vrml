@@ -28,7 +28,7 @@ transformers = transforms.Compose([
 ])
 
 # Gan trainer
-worker = aae_worker(z_dim=3, h_dim=128, filter_num=64, channel_num=3, lr=args.lr, cuda=cuda)
+worker = aae_worker(z_dim=8, h_dim=128, filter_num=64, channel_num=3, lr=args.lr, cuda=cuda)
 
 if __name__ == '__main__':
     if args.resume:
