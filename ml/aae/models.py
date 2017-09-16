@@ -26,6 +26,7 @@ def weight_init(m):
 class Encoder(nn.Module):
     def __init__(self, z_dim, h_dim=128, filter_num=64, channel_num=3):
         super(Encoder, self).__init__()
+
         self.conv = nn.Sequential(
             # Input: (channel_num) x 256 x 256
             nn.Conv2d(channel_num, filter_num, 4, 2, 1, bias=False),
@@ -58,6 +59,7 @@ class Encoder(nn.Module):
         x = self.conv(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
+
         return x
 
 
