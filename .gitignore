@@ -137,3 +137,5 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+*.tar

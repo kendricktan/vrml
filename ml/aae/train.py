@@ -3,6 +3,8 @@ import sys
 import argparse
 import torch
 
+sys.path.append(os.path.dirname(__file__))
+
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 
