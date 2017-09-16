@@ -6,6 +6,7 @@ TagManager:
   tags:
   - LeftHand
   - RightHand
+  - InteractionCube
   layers:
   - Default
   - TransparentFX

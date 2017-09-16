@@ -23,19 +23,16 @@ public class FirebaseTest : MonoBehaviour
 
     void Start()
     {
-        // change color
+        imagesHolder = GameObject.Find("ImagesHolder").transform;
         defaultColor = Color.blue;
-        defaultScale = new Vector3(0.05f, 0.05f, 0.05f);
+        defaultScale = new Vector3(0.01f, 0.01f, 0.01f);
 
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://vrml-c8ee5.firebaseio.com/");
         storage = FirebaseStorage.DefaultInstance;
         reference = FirebaseDatabase.DefaultInstance.RootReference;
-        reference.Child("images").ChildAdded += HandleChildAdded;
-        reference.Child("images").ChildChanged += HandleChildChanged;
-
-        // possible start position
-        Vector3 pos = player.transform.position - new Vector3(0, 0.5f, -1);
-        createCube(pos, "test");
+        reference.Child("images_similar_100").ChildChanged += HandleChildChanged;
+       // reference.Child("message").ValueChanged += MsgChanged;
+       // reference.Child("message").ChildChanged += TstMsgChanged;
     }
 
     private void writeBool(bool _state)
@@ -52,17 +49,35 @@ public class FirebaseTest : MonoBehaviour
             Debug.LogError(args.DatabaseError.Message);
             return;
         }
-        // Do something with the data in args.Snapshot
+        Debug.Log(args.Snapshot.Child("coordinates").Child("x").ToString() + ", " +
+            args.Snapshot.Child("coordinates").Child("y").ToString() + ", " +
+            args.Snapshot.Child("coordinates").Child("z").ToString());
+
+        createCube(string2Vector3(args.Snapshot.Child("coordinates").Child("x").ToString(), 
+            args.Snapshot.Child("coordinates").Child("y").ToString(), 
+            args.Snapshot.Child("coordinates").Child("z").ToString()),
+            args.Snapshot.Child("id").ToString().Replace(".png", ""));
     }
 
-    void HandleChildChanged(object sender, ChildChangedEventArgs args)
-    {
-        if (args.DatabaseError != null)
-        {
-            Debug.LogError(args.DatabaseError.Message);
-            return;
-        }
-        // Do something with the data in args.Snapshot
+    string[] cubes;
+
+    Vector3 string2Vector3(string x, string y, string z) {
+        Debug.Log(x + ", " + y + ", " + z);
+        Vector3 toRet = new Vector3(float.Parse(x), float.Parse(y), float.Parse(z));
+        return toRet;
+    }
+    void HandleChildChanged(object sender, ChildChangedEventArgs args) {
+
+
+        Debug.Log(args.Snapshot.GetRawJsonValue());
+
+        //dataPoint[] dp = JsonUtility.FromJson<dataPoint>(args.Snapshot.GetRawJsonValue());
+        //dp.coords = 
+            /*updateCube(string2Vector3(args.Snapshot.Child("coordinates").Child("x").ToString(),
+            args.Snapshot.Child("coordinates").Child("y").ToString(),
+            args.Snapshot.Child("coordinates").Child("z").ToString()),
+            args.Snapshot.Child("id").ToString().Replace(".png", ""),
+            float.Parse(args.Snapshot.Child("distance").ToString()) * Color.red);*/
     }
 
     void createCube(Vector3 pos, string name)
@@ -104,6 +119,14 @@ public class FirebaseTest : MonoBehaviour
         www.LoadImageIntoTexture(tex);
         GameObject.Find(cubeid).GetComponent<Renderer>().material.mainTexture = tex;
     }
+
+    void MsgChanged(object sender, ValueChangedEventArgs args) {
+        Debug.Log(args.Snapshot.Value.ToString());
+    }
+
+    void TstMsgChanged(object sender, ChildChangedEventArgs args) {
+        Debug.Log(args.Snapshot.Value.ToString());
+    }
 }
 
 public class State
@@ -116,5 +139,41 @@ public class State
     public State(bool state)
     {
         this.state = state;
+    }
+}
+[Serializable]
+public class dataPoint {
+    public string id;
+    public Coords coords;
+    public float distance;
+}
+[Serializable]
+public class Coords {
+    public string x;
+    public string y;
+    public string z;
+}
+
+public static class JsonHelper {
+    public static T[] FromJson<T>(string json) {
+        Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(json);
+        return wrapper.Items;
+    }
+
+    public static string ToJson<T>(T[] array) {
+        Wrapper<T> wrapper = new Wrapper<T>();
+        wrapper.Items = array;
+        return JsonUtility.ToJson(wrapper);
+    }
+
+    public static string ToJson<T>(T[] array, bool prettyPrint) {
+        Wrapper<T> wrapper = new Wrapper<T>();
+        wrapper.Items = array;
+        return JsonUtility.ToJson(wrapper, prettyPrint);
+    }
+
+    [Serializable]
+    private class Wrapper<T> {
+        public T[] Items;
     }
 }
