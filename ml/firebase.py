@@ -50,12 +50,6 @@ def update_image_storage(store, idx, image_loc):
     store.child('image_{}.png'.format(idx)).put(image_loc)
 
 
-"""
-search: update params of top 100
-
-training: update activations
-"""
-
 # Partial functions
 visualize_func = partial(update_neurons, database)
 search_func = partial(finding_similar, database)
@@ -102,9 +96,17 @@ if __name__ == '__main__':
     # Load our stuff
     worker.load_tree(args.tree_loc, args.h5_loc)
 
-    # Search example
-    # worker.search_similar((0, 0, 0), search_func)
+    # Firebase Stream and update on data change
+    def train_handle(msg):
+        if msg['data'] == 1:
+            print('Updating firebase activations...')
+            worker.train(train_loader, 0, viz_func=visualize_func)
+        database.child('is_training').set(0)
 
-    # Training example
-    # for e in range(1):
-    #     worker.train(train_loader, e, viz_func=visualize_func)
+    def search_handle(msg):
+        coord = list(map(lambda x: float(x), msg['data'].split(',')))
+        worker.search_similar(coord, search_func)
+        print('Updating firebase search result')
+
+    database.child('is_training').stream(train_handle)
+    database.child('query_coord').stream(search_handle)
