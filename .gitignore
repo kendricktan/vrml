@@ -139,3 +139,5 @@ sysinfo.txt
 *.unitypackage
 
 *.tar
+
+*/visualize/*.png
