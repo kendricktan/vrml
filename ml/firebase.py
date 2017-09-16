@@ -1,5 +1,7 @@
 import pyrebase
 from functools import partial
+from aae.worker import aae_worker
+
 #from aee.... import worker
 
 config = {
@@ -20,20 +22,25 @@ def stream_handler(message):
 def update_neurons(db, neural_number, activation_matrix):
     db.child("neurons").push({neural_number: neural_number, activation_matrix: activation_matrix})
 
-def finding_similar(db, store, input_coordinate, coordinates, images, distance_scores):
+def finding_similar(db, store, input_coordinate, image_ids, coordinates, distance_scores):
     """
     Args:
         db: firebase db object
         store: firebase storage object
+        image_id: list of image ids
         coordinates: list of tuples
-        images: list of image paths
         distance_scores: list of floats
     """
-    zipped_attributes = list(zip((i for i in range(len(images))), coordinates, images, distance_scores))
-    db.child("images_top_100").push(zipped_attributes)
-    
-    map(lambda idx, image: store.child("{}".format(idx)).put("{}".format(image)), enumerate(images))
+    zipped_attributes = list(image_ids, coordinates, distance_scores))
+    db.child("image_ids_top_100").push(zipped_attributes)
 
+"""
+build tree: update images
+search: update params of top 100
+
+training: update activations
+"""
+    
 
 visualize_neurons = partial(update_neurons, database)
-find_similar = partial(finding_similar, database, storage)
+search = partial(finding_similar, database, storage)

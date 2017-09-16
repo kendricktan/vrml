@@ -24,11 +24,6 @@ args, unknown = parser.parse_known_args()
 cuda = True if 'true' in args.cuda.lower() else False
 # cuda = True
 
-transformers = transforms.Compose([
-    transforms.Scale((256, 256)),
-    transforms.ToTensor(),
-])
-
 # Gan trainer
 worker = aae_worker(z_dim=3, h_dim=128, filter_num=64, channel_num=3, lr=args.lr, cuda=cuda)
 
