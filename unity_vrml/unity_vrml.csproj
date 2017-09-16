@@ -82,8 +82,17 @@
     <Reference Include="Firebase.App">
       <HintPath>Assets\Firebase\Plugins\Firebase.App.dll</HintPath>
     </Reference>
+    <Reference Include="Firebase.Auth">
+      <HintPath>Assets\Firebase\Plugins\Firebase.Auth.dll</HintPath>
+    </Reference>
+    <Reference Include="Firebase.Database">
+      <HintPath>Assets\Firebase\Plugins\Firebase.Database.dll</HintPath>
+    </Reference>
     <Reference Include="Google.MiniJson">
       <HintPath>Assets\Firebase\Plugins\Google.MiniJson.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Sharpen">
+      <HintPath>Assets\Firebase\Plugins\Google.Sharpen.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Compat">
       <HintPath>Assets\Parse\Plugins\Unity.Compat.dll</HintPath>
@@ -91,14 +100,8 @@
     <Reference Include="Unity.Tasks">
       <HintPath>Assets\Parse\Plugins\Unity.Tasks.dll</HintPath>
     </Reference>
-    <Reference Include="Firebase.Database">
-      <HintPath>Assets\Firebase\Plugins\Firebase.Database.dll</HintPath>
-    </Reference>
-    <Reference Include="Google.Sharpen">
-      <HintPath>Assets\Firebase\Plugins\Google.Sharpen.dll</HintPath>
-    </Reference>
-    <Reference Include="Firebase.Auth">
-      <HintPath>Assets\Firebase\Plugins\Firebase.Auth.dll</HintPath>
+    <Reference Include="Firebase.Storage">
+      <HintPath>Assets\Firebase\Plugins\Firebase.Storage.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +158,7 @@
     <Compile Include="Assets\NewtonVR\Oculus\NVROculusIntegration.cs" />
     <Compile Include="Assets\NewtonVR\SteamVR\NVRSteamVRInputDevice.cs" />
     <Compile Include="Assets\NewtonVR\SteamVR\NVRSteamVRIntegration.cs" />
+    <Compile Include="Assets\Scripts\SphereSpawner.cs" />
     <Compile Include="Assets\SteamVR\Extras\SteamVR_GazeTracker.cs" />
     <Compile Include="Assets\SteamVR\Extras\SteamVR_LaserPointer.cs" />
     <Compile Include="Assets\SteamVR\Extras\SteamVR_Teleporter.cs" />
@@ -263,6 +267,7 @@
     <None Include="Assets\Firebase\Editor\FirebaseAnalytics_v4.1.0_manifest.txt" />
     <None Include="Assets\Firebase\Editor\FirebaseAuth_v4.1.0_manifest.txt" />
     <None Include="Assets\Firebase\Editor\FirebaseDatabase_v4.1.0_manifest.txt" />
+    <None Include="Assets\Firebase\Editor\FirebaseStorage_v4.1.0_manifest.txt" />
     <None Include="Assets\Firebase\Plugins\Http\link.xml" />
     <None Include="Assets\Firebase\Plugins\link.xml" />
     <None Include="Assets\Firebase\m2repository\com\google\firebase\firebase-analytics-unity\maven-metadata.xml" />
@@ -281,6 +286,7 @@
     <None Include="Assets\SteamVR\Resources\SteamVR_Fade.shader" />
     <None Include="Assets\SteamVR\Resources\SteamVR_SphericalProjection.shader" />
     <None Include="Assets\SteamVR\readme.txt" />
+    <None Include="Assets\Wispy Sky\ReadMe.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
