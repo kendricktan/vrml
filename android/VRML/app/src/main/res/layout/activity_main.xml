@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 
     xmlns:app="http://schemas.android.com/apk/res-auto"
 
@@ -21,7 +21,7 @@
 
         android:id="@+id/textView1"
 
-        android:text="Welcome to Main Activity"
+        android:text="Deep Reality Mobile App"
 
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
 
@@ -30,4 +30,37 @@
         android:layout_marginTop="100dp"
 
         android:textAlignment="center" />
-</LinearLayout>
+
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:hint="Message..."
+        android:layout_marginBottom="174dp"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/button2"
+        android:layout_toStartOf="@+id/button2" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        android:layout_alignTop="@+id/editText"
+        android:layout_toRightOf="@+id/toggleStateButton"
+        android:layout_toEndOf="@+id/toggleStateButton"
+        android:layout_marginLeft="27dp"
+        android:layout_marginStart="27dp" />
+
+    <Button
+        android:id="@+id/toggleStateButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        android:layout_above="@+id/button2"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="78dp" />
+
+</RelativeLayout>
