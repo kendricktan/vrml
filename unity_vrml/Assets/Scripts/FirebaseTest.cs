@@ -22,8 +22,10 @@ public class FirebaseTest : MonoBehaviour
     Vector3 defaultScale;
     FirebaseStorage storage;
     public GameObject player;
+    public Color colorToUse;
 
     void Start() {
+        colorToUse = Color.black;
         imagesHolder = GameObject.Find("ImagesHolder").transform;
         secondImagesHolder = GameObject.Find("SecondImagesHolder").transform;
 
@@ -101,11 +103,13 @@ public class FirebaseTest : MonoBehaviour
     }
 
     bool start = true;
+    public bool changeWhichCubesToColor = false;
     void TrainingChanged(object sender, ValueChangedEventArgs args) {
         Debug.Log(args.Snapshot.GetRawJsonValue());
         if(args.Snapshot.Value.ToString() == "0" && !start) {
             deleteNeurons();
             reference.Child("query_coord").SetValueAsync("0,0,0");
+            changeWhichCubesToColor = true;
         } else if (start) {
             start = false;
         }
@@ -155,7 +159,7 @@ public class FirebaseTest : MonoBehaviour
     }
 
     void changeNColor(GameObject g, float val) {
-        g.GetComponent<Renderer>().material.color = Color.black;
+        g.GetComponent<Renderer>().material.color = colorToUse;
        g.GetComponent<Renderer>().material.color -= new Color(val * 10,  val * 10, val * 10);
     }
 

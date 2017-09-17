@@ -1,0 +1,26 @@
+# File produced by Open Asset Import Library (http://www.assimp.sf.net)
+# (assimp v3.1.187496374)
+
+newmtl glass white
+Kd 0.941176 0.937255 0.929412
+Ka 0.941176 0.937255 0.929412
+Ks 0.0313726 0.0313726 0.0313726
+Ke 0 0 0
+d 1
+Ns 30
+illum 2
+map_Kd PAPER_TE.JPG
+bump PAPER_TE.JPG
+map_bump PAPER_TE.JPG
+
+newmtl st wood
+Kd 0.913725 0.784314 0.560784
+Ka 0.913725 0.784314 0.560784
+Ks 0.898039 0.898039 0.898039
+Ke 0 0 0
+d 1
+illum 1
+map_Kd WOOD62VE.JPG
+bump WOOD62VE.JPG
+map_bump WOOD62VE.JPG
+
