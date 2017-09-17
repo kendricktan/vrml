@@ -18,12 +18,15 @@ public class FirebaseTest : MonoBehaviour
 
     Color defaultColor;
     Transform imagesHolder;
+    Transform secondImagesHolder;
     Vector3 defaultScale;
     FirebaseStorage storage;
     public GameObject player;
 
     void Start() {
         imagesHolder = GameObject.Find("ImagesHolder").transform;
+        secondImagesHolder = GameObject.Find("SecondImagesHolder").transform;
+
         defaultColor = Color.blue;
         defaultScale = new Vector3(0.01f, 0.01f, 0.01f);
 
@@ -35,7 +38,10 @@ public class FirebaseTest : MonoBehaviour
         reference.Child("images_similar_100").ChildChanged += HandleChildChanged;
         reference.Child("neurons").Child("activations").ValueChanged += HandleNeuronChanges;
         reference.Child("is_training").ValueChanged += TrainingChanged;
+        reference.Child("message").ValueChanged += MessageChanged;
     }
+
+    public GameObject loaderPr;
 
     IEnumerator addImageTriggerScript() {
         yield return new WaitForSeconds(3f);
@@ -50,12 +56,20 @@ public class FirebaseTest : MonoBehaviour
         h1z1.GetComponent<SphereCollider>().isTrigger = true;
         h1z1.AddComponent<TriggerImage>();
         GameObject tpain = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        tpain.AddComponent<Orient>();
         tpain.transform.SetParent(GameObject.Find("Hand1").transform);
         tpain.transform.localScale = new Vector3(.02f, .02f, .02f);
         tpain.transform.localPosition = Vector3.zero;
-        //tpain.transform.localPosition += new Vector3(0, .01f, 0);
         h1z1.GetComponent<TriggerImage>().pane = tpain;
         tpain.SetActive(false);
+
+        GameObject l1 = (GameObject)Instantiate(loaderPr, Vector3.zero, Quaternion.identity);
+        l1.transform.SetParent(GameObject.Find("Hand1").transform);
+        l1.transform.localScale = new Vector3(.02f, .02f, .02f);
+        l1.transform.localPosition = new Vector3(0f, .03f, 0);
+        l1.transform.localRotation = new Quaternion(0.7071068f, 0, 0, 0.7071068f);
+        h1z1.GetComponent<TriggerImage>().loader = l1;
+        l1.SetActive(false);
 
         GameObject h1z2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         h1z2.GetComponent<MeshRenderer>().enabled = false;
@@ -72,9 +86,17 @@ public class FirebaseTest : MonoBehaviour
         tpain2.transform.SetParent(GameObject.Find("Hand2").transform);
         tpain2.transform.localScale = new Vector3(.02f, .02f, .02f);
         tpain2.transform.localPosition = Vector3.zero;
-        //tpain2.transform.localPosition += new Vector3(0, .01f, 0);
+        tpain2.AddComponent<Orient>();
         h1z2.GetComponent<TriggerImage>().pane = tpain2;
         tpain2.SetActive(false);
+
+        GameObject l2 = (GameObject)Instantiate(loaderPr, Vector3.zero, Quaternion.identity);
+        l2.transform.SetParent(GameObject.Find("Hand2").transform);
+        l2.transform.localScale = new Vector3(.02f, .02f, .02f);
+        l2.transform.localPosition = new Vector3(0f, .03f, 0);
+        l2.transform.localRotation = new Quaternion(0.7071068f, 0, 0, 0.7071068f);
+        h1z2.GetComponent<TriggerImage>().loader = l2;
+        l2.SetActive(false);
 
     }
 
@@ -82,7 +104,6 @@ public class FirebaseTest : MonoBehaviour
     void TrainingChanged(object sender, ValueChangedEventArgs args) {
         Debug.Log(args.Snapshot.GetRawJsonValue());
         if(args.Snapshot.Value.ToString() == "0" && !start) {
-            //hideNeurons();
             deleteNeurons();
             reference.Child("query_coord").SetValueAsync("0,0,0");
         } else if (start) {
@@ -112,7 +133,7 @@ public class FirebaseTest : MonoBehaviour
         for (int k = 0; k < n.Count -1; k++) {
             GameObject g = GameObject.Find(k.ToString());
             if(!g) {
-                createCube(new Vector3(0 + (float)(.03 * rowCounter), 0, 0 + (float)(.03 * colCounter)), k.ToString());
+                createCube(new Vector3(0 + (float)(.03 * rowCounter), 0, 0 + (float)(.03 * colCounter)), k.ToString(), imagesHolder);
                 colCounter++;
                 colCounter = colCounter % 25;
                 if (colCounter == 0)
@@ -134,8 +155,8 @@ public class FirebaseTest : MonoBehaviour
     }
 
     void changeNColor(GameObject g, float val) {
-        g.GetComponent<Renderer>().material.color = Color.blue;
-       g.GetComponent<Renderer>().material.color += new Color(0, 0, val * 10);
+        g.GetComponent<Renderer>().material.color = Color.black;
+       g.GetComponent<Renderer>().material.color -= new Color(val * 10,  val * 10, val * 10);
     }
 
     void HandleChildChanged(object sender, ChildChangedEventArgs args) {
@@ -147,16 +168,19 @@ public class FirebaseTest : MonoBehaviour
             Debug.Log(n.AsArray[i]["distance"]);
 
             if (!GameObject.Find(n.AsArray[i]["id"])) {
-                createCube(string2Vector3(n.AsArray[i]["coord"]["x"], n.AsArray[i]["coord"]["y"], n.AsArray[i]["coord"]["z"]) / 2f, n.AsArray[i]["id"], 3f);
-            } else {
-                updateCube(string2Vector3(n.AsArray[i]["coord"]["x"], n.AsArray[i]["coord"]["y"], n.AsArray[i]["coord"]["z"]) / 2f, n.AsArray[i]["id"], Color.red * n.AsArray[i]["distance"]);
+                createCube(string2Vector3(n.AsArray[i]["coord"]["x"], n.AsArray[i]["coord"]["y"], n.AsArray[i]["coord"]["z"]) / 2f, n.AsArray[i]["id"], secondImagesHolder, 3f);
             }
         }
     }
 
-    GameObject createCube(Vector3 pos, string name, float scaleMod = 0) {
+    void MessageChanged(object sender, ValueChangedEventArgs args) {
+        string msg = args.Snapshot.Value.ToString();
+        GameObject.Find("CurrentMsg").GetComponent<UnityEngine.UI.Text>().text = msg;
+    }
+
+    GameObject createCube(Vector3 pos, string name, Transform loc, float scaleMod = 0) {
         GameObject c = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        c.transform.SetParent(imagesHolder);
+        c.transform.SetParent(loc);
         c.transform.localPosition = pos;
         c.transform.localScale = defaultScale;
         c.GetComponent<Renderer>().material.color = defaultColor;
@@ -176,21 +200,23 @@ public class FirebaseTest : MonoBehaviour
         c.GetComponent<Renderer>().material.color = color;
     }
 
-    public void getImageFromStorage(string imageId, GameObject pane) {
+    public void getImageFromStorage(string imageId, GameObject pane, GameObject loader) {
         StorageReference reference = storage.GetReference(imageId);
         reference.GetDownloadUrlAsync().ContinueWith(task => {
-            StartCoroutine(getImageViaWWW(task.Result.ToString(), pane));
+            StartCoroutine(getImageViaWWW(task.Result.ToString(), pane, loader));
         });
     }
 
-    IEnumerator getImageViaWWW(string url, GameObject pane) // change this
-    {
+    IEnumerator getImageViaWWW(string url, GameObject pane, GameObject loader) {
         Texture2D tex;
         tex = new Texture2D(4, 4, TextureFormat.DXT1, false);
         WWW www = new WWW(url);
         yield return www;
         www.LoadImageIntoTexture(tex);
         pane.GetComponent<Renderer>().material.mainTexture = tex;
+        if(!pane.GetComponent<Orient>().locked)
+            pane.SetActive(true);
+        loader.SetActive(false);
     }
 
     void MsgChanged(object sender, ValueChangedEventArgs args) {

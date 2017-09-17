@@ -5,14 +5,15 @@ using UnityEngine;
 public class TriggerImage : MonoBehaviour {
 
 	void Update() {
-        if(pane != null && player != null) {
-            pane.transform.LookAt(pane.transform.position + player.transform.rotation * Vector3.up,
-         player.transform.rotation * Vector3.up);
-        }
+       // if(pane != null && player != null) {
+         //   pane.transform.LookAt(pane.transform.position + player.transform.rotation * Vector3.up,
+        // player.transform.rotation * Vector3.up);
+        //}
     }
 
     string imgid;
     public GameObject pane;
+    public GameObject loader;
     public GameObject player;
 
     void Start() {
@@ -22,14 +23,18 @@ public class TriggerImage : MonoBehaviour {
     private void OnTriggerEnter(Collider other)    {
         if (other.tag.Equals("InteractionCube")) {
             imgid = other.name;
-            pane.SetActive(true);
-            GameObject.Find("Scripts").GetComponent<FirebaseTest>().getImageFromStorage(imgid, pane);
+            loader.SetActive(true);
+            //pane.SetActive(true);
+            pane.GetComponent<Orient>().locked = false;
+
+            GameObject.Find("Scripts").GetComponent<FirebaseTest>().getImageFromStorage(imgid, pane, loader);
         }
     }
 
     private void OnTriggerExit(Collider other) {
         if (other.tag.Equals("InteractionCube") && other.name == imgid) {
             pane.SetActive(false);
+            pane.GetComponent<Orient>().locked = true;
         }
     }
 }

@@ -7,7 +7,7 @@ public class ShowRandomImage : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        getImageFromStorage("image_" + int.Parse(Random.Range(0, 405f).ToString()).ToString() + ".png", this.gameObject);
+        getImageFromStorage("image_" + Random.Range(0, 405).ToString() + ".png", this.gameObject);
 	}
 
     public void getImageFromStorage(string imageId, GameObject pane) {
